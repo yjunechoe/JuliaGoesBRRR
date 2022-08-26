@@ -1,0 +1,511 @@
+---
+title: "R vs. Julia LMEM comparisons"
+author: "June Choe"
+date: "2022-08-25"
+format:
+  html:
+    theme: flatly
+    toc: true
+    page-layout: full
+filters:
+  - grouped-tabsets
+cache: true
+---
+
+## Setup
+
+::: {.panel-tabset group="language"}
+
+## R
+
+```{r R-setup}
+#| message: false
+library(arrow)
+library(lme4); library(lmerTest)
+library(broom); library(broom.mixed)
+```
+
+Extra setup to use Julia in Quarto:
+
+```{r R-setup-misc}
+#| message: false
+library(JuliaCall)
+system.time( julia_setup() )
+```
+
+## Julia
+
+Libraries:
+
+```{julia J-setup}
+using MKL, Arrow, DataFrames, MixedModels, StatsModels
+```
+
+Extra setup for interactive REPL:
+
+```{julia J-setup-misc}
+#| results: hide
+using ProgressMeter, InteractiveUtils
+ProgressMeter.ijulia_behavior(:clear)
+```
+
+:::
+
+## 1) Linear regression predicting AY vheight
+
+### Data from **PNC**
+
+::: {.panel-tabset group="language"}
+
+## R
+
+```{r R-1-data}
+PNC_ay <- read_feather("PNC_ay.arrow")
+```
+
+```{r R-1-show-data}
+summary(PNC_ay)
+```
+
+## Julia
+
+```{julia J-1-data}
+PNC_ay = Arrow.Table("PNC_ay.arrow")
+```
+
+```{julia J-1-show-data}
+describe(DataFrame(PNC_ay))
+```
+
+:::
+
+### Model 1: Maximal
+
+::: {.panel-tabset group="language"}
+
+## R
+
+R dies 😤
+
+Not run:
+
+```{r R-1-m1}
+#| eval: false
+system.time(
+  R_lmm_1 <- lmer(
+    vheight ~ birthyear_z2 * allophone * gender + logdur_z2 + frequency_z2 +
+                  (1 + allophone + logdur_z2 + frequency_z2 | participant) +
+                  (1 + birthyear_z2 * gender + logdur_z2 | word),
+    data = PNC_ay
+  )
+)
+```
+
+## Julia
+
+Julia goes brrr
+
+```{julia J-1-m1}
+J_lmm_1 = @time fit(
+  MixedModel,
+  @formula(
+    vheight ~ birthyear_z2 * allophone * gender + logdur_z2 + frequency_z2 +
+                  (1 + allophone + logdur_z2 + frequency_z2 | participant) +
+                  (1 + birthyear_z2 * gender + logdur_z2 | word)
+  ),
+  PNC_ay
+)
+```
+
+No singular fit!
+
+```{julia J-1-m1-singular}
+issingular(J_lmm_1)
+```
+
+:::
+
+### Model 2: Zero correlation
+
+::: {.panel-tabset group="language"}
+
+## R
+
+R dies 😤
+
+Not run:
+
+```{r R-1-m2}
+#| eval: false
+system.time(
+  R_lmm_2 <- lmer(
+    vheight ~ birthyear_z2 * allophone * gender + logdur_z2 + frequency_z2 +
+                  (1 + allophone + logdur_z2 + frequency_z2 || participant) +
+                  (1 + birthyear_z2 * gender + logdur_z2 || word),
+    data = PNC_ay
+  )
+)
+```
+
+## Julia
+
+Still fits, now faster
+
+```{julia J-1-m2}
+J_lmm_2 = @time fit(
+  MixedModel,
+  @formula(
+    vheight ~ birthyear_z2 * allophone * gender + logdur_z2 + frequency_z2 +
+                  zerocorr(1 + allophone + logdur_z2 + frequency_z2 | participant) +
+                  zerocorr(1 + birthyear_z2 * gender + logdur_z2 | word)
+  ),
+  PNC_ay
+)
+```
+
+Best to keep it maximal, though
+
+```{julia J-1-m1-m2-anova}
+MixedModels.likelihoodratiotest(J_lmm_1, J_lmm_2)
+```
+
+:::
+
+### Model 3: Intercept Only
+
+::: {.panel-tabset group="language"}
+
+## R
+
+Finally fits
+
+```{r R-1-m3}
+system.time(
+  R_lmm_3 <- lmer(
+    vheight ~ birthyear_z2 * allophone * gender + logdur_z2 + frequency_z2 +
+                  (1 | participant) +
+                  (1 | word),
+    data = PNC_ay
+  )
+)
+```
+
+```{r R-1-m3-ranef}
+tidy(R_lmm_3, effects = "ran_pars")
+```
+
+```{r R-1-m3-fixed}
+tidy(R_lmm_3, effects = "fixed")
+```
+
+## Julia
+
+brrr
+
+```{julia J-1-m3}
+J_lmm_3 = @time fit(
+  MixedModel,
+  @formula(
+    vheight ~ birthyear_z2 * allophone * gender + logdur_z2 + frequency_z2 +
+                  (1 | participant) +
+                  (1 | word)
+  ),
+  PNC_ay
+)
+```
+
+:::
+
+### Misc: re-fitting Julia maximal model with REML
+
+```{julia J-1-m1-reml}
+@time refit!(J_lmm_1, REML = true)
+```
+
+<br>
+<br>
+
+## 2) Logistic regression predicting accuracy
+
+### Data from **Choe, Yoshida, & Cole (2022)**
+
+::: {.panel-tabset group="language"}
+
+## R
+
+```{r R-2-data}
+CYC_2022 <- read_feather("CYC_2022.arrow")
+```
+
+```{r R-2-show-data}
+#| echo: false
+rmarkdown::paged_table(CYC_2022)
+```
+
+## Julia
+
+```{julia J-2-data}
+CYC_2022 = Arrow.Table("CYC_2022.arrow")
+```
+
+:::
+
+### Coding scheme
+
+::: {.panel-tabset group="language"}
+
+## R
+
+Explicit sum-coding of `Condition`
+
+```{r R-2-coding}
+CYC_2022$Condition <- c("Verb" = 1, "Subject" = -1)[CYC_2022$Condition]
+```
+
+## Julia
+
+Coding dictionary with sum-coding of `Condition` and groups marked with `Grouping()`
+
+```{julia J-2-coding}
+#| results: hide
+coding2 = Dict(
+  :Subject => Grouping(),
+  :Item => Grouping(),
+  :Condition => EffectsCoding(base = "Subject")
+)
+```
+
+:::
+
+### Model 1: Maximal
+
+::: {.panel-tabset group="language"}
+
+## R
+
+R dies 😤
+
+```{r R-2-m1}
+#| eval: false
+R_lmm_1 <- lmer(
+  Accuracy ~ Condition * SemanticFit * Transitivity +
+    (1 + Condition | Item) +
+    (1 + Condition * SemanticFit * Transitivity | Subject),
+  data = CYC_2022, family = binomial()
+)
+```
+
+## Julia
+
+Converges...
+
+```{julia J-2-m1}
+J_glmm_1 = @time fit(
+  MixedModel,
+  @formula(
+    Accuracy ~ Condition * SemanticFit * Transitivity +
+        (1 + Condition * SemanticFit * Transitivity | Subject) +
+        (1 + Condition | Item)
+  ),
+  CYC_2022, Binomial(), contrasts = coding2
+)
+```
+
+... but with singular fit
+
+```{julia J-2-m1-singular}
+issingular(J_glmm_1)
+```
+
+:::
+
+### Model 2: Zero correlation
+
+::: {.panel-tabset group="language"}
+
+## R
+
+R dies again 😤
+
+```{r R-2-m2}
+#| eval: false
+R_glmm_2 <- glmer(
+  Accuracy ~ Condition * SemanticFit * Transitivity +
+    (1 + Condition || Item) +
+    (1 + Condition * SemanticFit * Transitivity || Subject),
+  data = CYC_2022, family = binomial()
+)
+```
+
+## Julia
+
+Converges...
+
+```{julia J-2-m2}
+J_glmm_2 = @time fit(
+  MixedModel,
+  @formula(
+    Accuracy ~ Condition * SemanticFit * Transitivity +
+        zerocorr(1 + Condition * SemanticFit * Transitivity | Subject) +
+        zerocorr(1 + Condition | Item)
+  ),
+  CYC_2022, Binomial(), contrasts = coding2
+)
+```
+
+... butwith singular fit, again
+
+```{julia J-2-m2-singular}
+issingular(J_glmm_2)
+```
+
+PCA on random effects structure:
+
+```{julia J-2-m2-repca}
+J_glmm_2.rePCA
+```
+
+:::
+
+
+### Model 3: Zero variance components dropped
+
+::: {.panel-tabset group="language"}
+
+## R
+
+R doesn't die, but model fails to converge
+
+```{r R-2-m3}
+system.time(
+  R_glmm_3 <- glmer(
+    Accuracy ~ Condition * SemanticFit * Transitivity +
+      (1 | Item) +
+      (1 + Condition | Subject),
+    data = CYC_2022, family = binomial()
+  )
+)
+```
+
+## Julia
+
+Converges ...
+
+```{julia J-2-m3}
+J_glmm_3 = @time fit(
+  MixedModel,
+  @formula(
+    Accuracy ~ Condition * SemanticFit * Transitivity +
+        (1 + Condition | Subject) +
+        (1 | Item)
+  ),
+  CYC_2022, Binomial(), contrasts = coding2
+)
+```
+
+... no singular fit!
+
+```{julia J-2-m3-singular}
+issingular(J_glmm_3)
+```
+
+:::
+
+### Model 4: Reduced - some interaction terms dropped
+
+::: {.panel-tabset group="language"}
+
+## R
+
+Converges
+
+```{r R-2-m4}
+system.time(
+  R_glmm_4 <- glmer(
+    Accuracy ~ Condition + SemanticFit * Transitivity +
+      (1 | Item) +
+      (1 + Condition | Subject),
+    data = CYC_2022, family = binomial()
+  )
+)
+```
+
+```{r R-2-m4-ranef}
+tidy(R_glmm_4, effects = "ran_pars")
+```
+
+```{r R-2-m4-coef}
+tidy(R_glmm_4, effects = "fixed")
+```
+
+## Julia
+
+Converges, of course
+
+```{julia J-2-m4}
+J_glmm_4 = @time fit(
+  MixedModel,
+  @formula(
+    Accuracy ~ Condition + SemanticFit * Transitivity +
+        (1 + Condition | Subject) +
+        (1 | Item)
+  ),
+  CYC_2022, Binomial(), contrasts = coding2
+)
+```
+
+:::
+
+### Model comparison
+
+Reduced model is actually adequate, and you might prefer this if you care about parsimony, but only Julia can give us this info:
+
+```{julia J-2-m3-m4-anova}
+MixedModels.likelihoodratiotest(J_glmm_3, J_glmm_4)
+```
+
+R actually can give us the same info, but only because the max model that failed to converge happened to get pretty close.
+
+```{r R-2-m3-m4-anova}
+anova(R_glmm_3, R_glmm_4)
+```
+
+Generally you can't do tests like this on models that fail to converge. While the convergence issue here was just one of performance (lower threshold or # of iterations would've sufficed), you can't know this a priori. You also cannot make any claims about how trivial the contribution of the dropped interaction effects were in the `R_glmm_3` model because it failed to converge.
+
+### Misc: `fast` fitting of maximal model
+
+Only available for GLMM
+
+```{julia J-2-m1-fast}
+@time fit(
+  MixedModel,
+  @formula(
+    Accuracy ~ Condition * SemanticFit * Transitivity +
+        (1 + Condition * SemanticFit * Transitivity | Subject) +
+        (1 + Condition | Item)
+  ),
+  CYC_2022, Binomial(), contrasts = coding2,
+  fast = true
+)
+```
+
+<br>
+<br>
+
+## Version info
+
+R
+
+```{r R-session}
+R.version
+packageVersion("lme4")
+```
+
+Julia
+
+```{julia J-session}
+versioninfo()
+using Pkg
+Pkg.status("MixedModels")
+```
+
