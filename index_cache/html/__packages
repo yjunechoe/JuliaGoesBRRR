@@ -5,3 +5,5 @@ lmerTest
 broom
 broom.mixed
 JuliaCall
+dplyr
+ggplot2

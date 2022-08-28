@@ -116,6 +116,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#model-1-maximal" id="toc-model-1-maximal" class="nav-link" data-scroll-target="#model-1-maximal">Model 1: Maximal</a></li>
   <li><a href="#model-2-zero-correlation" id="toc-model-2-zero-correlation" class="nav-link" data-scroll-target="#model-2-zero-correlation">Model 2: Zero correlation</a></li>
   <li><a href="#model-3-intercept-only" id="toc-model-3-intercept-only" class="nav-link" data-scroll-target="#model-3-intercept-only">Model 3: Intercept Only</a></li>
+  <li><a href="#misc-bringing-julia-model-to-r" id="toc-misc-bringing-julia-model-to-r" class="nav-link" data-scroll-target="#misc-bringing-julia-model-to-r">Misc: Bringing Julia model to R</a></li>
   <li><a href="#misc-re-fitting-julia-maximal-model-with-reml" id="toc-misc-re-fitting-julia-maximal-model-with-reml" class="nav-link" data-scroll-target="#misc-re-fitting-julia-maximal-model-with-reml">Misc: re-fitting Julia maximal model with REML</a></li>
   </ul></li>
   <li><a href="#logistic-regression-predicting-accuracy" id="toc-logistic-regression-predicting-accuracy" class="nav-link" data-scroll-target="#logistic-regression-predicting-accuracy">2) Logistic regression predicting accuracy</a>
@@ -127,7 +128,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#model-3-zero-variance-components-dropped" id="toc-model-3-zero-variance-components-dropped" class="nav-link" data-scroll-target="#model-3-zero-variance-components-dropped">Model 3: Zero variance components dropped</a></li>
   <li><a href="#model-4-reduced---some-interaction-terms-dropped" id="toc-model-4-reduced---some-interaction-terms-dropped" class="nav-link" data-scroll-target="#model-4-reduced---some-interaction-terms-dropped">Model 4: Reduced - some interaction terms dropped</a></li>
   <li><a href="#model-comparison" id="toc-model-comparison" class="nav-link" data-scroll-target="#model-comparison">Model comparison</a></li>
-  <li><a href="#misc-fast-fitting-of-maximal-model" id="toc-misc-fast-fitting-of-maximal-model" class="nav-link" data-scroll-target="#misc-fast-fitting-of-maximal-model">Misc: <code>fast</code> fitting of maximal model</a></li>
+  <li><a href="#misc-fast-true-fitting-of-maximal-model" id="toc-misc-fast-true-fitting-of-maximal-model" class="nav-link" data-scroll-target="#misc-fast-true-fitting-of-maximal-model">Misc: <code>fast = true</code> fitting of maximal model</a></li>
   </ul></li>
   <li><a href="#version-info" id="toc-version-info" class="nav-link" data-scroll-target="#version-info">Version info</a></li>
   </ul>
@@ -169,28 +170,28 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false" href="">Julia</a></li></ul>
 <div class="tab-content" data-group="language">
 <div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
-<div class="cell" data-hash="index_cache/html/R-setup_0aa9a32084fb9bb4989423a96d124cfd">
+<div class="cell" data-hash="index_cache/html/R-setup_385cc8ba92e30f5d46b0b9099564ec9b">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(arrow)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lme4); <span class="fu">library</span>(lmerTest)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(broom); <span class="fu">library</span>(broom.mixed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Extra setup to use Julia in Quarto:</p>
-<div class="cell" data-hash="index_cache/html/R-setup-misc_1d64e02b9cfe31c93c3f4a3ca20b8f7c">
+<div class="cell" data-hash="index_cache/html/R-setup-misc_2ce2526de9658e0763339f183f040554">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(JuliaCall)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">system.time</span>( <span class="fu">julia_setup</span>() )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   user  system elapsed 
-  13.59    0.96   19.00 </code></pre>
+  10.42    0.98   18.00 </code></pre>
 </div>
 </div>
 </div>
 <div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
 <p>Libraries:</p>
-<div class="cell" data-hash="index_cache/html/J-setup_715f44661edb0ee32d79e4139a775421">
+<div class="cell" data-hash="index_cache/html/J-setup_74dcf399fa26e2db04ea5cd9ec77755d">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">MKL</span>, <span class="bu">Arrow</span>, <span class="bu">DataFrames</span>, <span class="bu">MixedModels</span>, <span class="bu">StatsModels</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Extra setup for interactive REPL:</p>
-<div class="cell" data-hash="index_cache/html/J-setup-misc_fe9405f6c1022af37d02c8d449e0d18f">
+<div class="cell" data-hash="index_cache/html/J-setup-misc_d5219ea02eeb1212c60b642570222d9e">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">ProgressMeter</span>, <span class="bu">InteractiveUtils</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>ProgressMeter.<span class="fu">ijulia_behavior</span>(<span class="op">:</span>clear)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -206,10 +207,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false" href="">Julia</a></li></ul>
 <div class="tab-content" data-group="language">
 <div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
-<div class="cell" data-hash="index_cache/html/R-1-data_48d3980b1031156dbae32e60907cfe50">
+<div class="cell" data-hash="index_cache/html/R-1-data_6a4bc8da9ec72ce6ac7336d300f9f07e">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>PNC_ay <span class="ot">&lt;-</span> <span class="fu">read_feather</span>(<span class="st">"PNC_ay.arrow"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-hash="index_cache/html/R-1-show-data_4ba186783e00a7ec46c0eb2ae80333e3">
+<div class="cell" data-hash="index_cache/html/R-1-show-data_68bbfb5459618274edd4143094448ed1">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(PNC_ay)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>    vheight         birthyear_z2         allophone            gender         
@@ -230,7 +231,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 </div>
 <div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
-<div class="cell" data-hash="index_cache/html/J-1-data_21077ca6ad713f6e2ad016c5fa5492b5">
+<div class="cell" data-hash="index_cache/html/J-1-data_00290ddc7953a4d7ac93fc38bb7ac9db">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>PNC_ay <span class="op">=</span> Arrow.<span class="fu">Table</span>(<span class="st">"PNC_ay.arrow"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Arrow.Table with 44580 rows, 8 columns, and schema:
@@ -247,7 +248,7 @@ with metadata given by a Base.ImmutableDict{String, String} with 1 entry:
   "r" =&gt; "A\n3\n262657\n197888\n5\nUTF-8\n531\n2\n531\n1\n781\n620\n333\n360\n3…</code></pre>
 </div>
 </div>
-<div class="cell" data-hash="index_cache/html/J-1-show-data_accf91436ae7e846629a5997bae2bbcf">
+<div class="cell" data-hash="index_cache/html/J-1-show-data_eb72722ab35906a3556d7c7b5d4065bc">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">describe</span>(<span class="fu">DataFrame</span>(PNC_ay))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>8×7 DataFrame
@@ -277,7 +278,7 @@ with metadata given by a Base.ImmutableDict{String, String} with 1 entry:
 <div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
 <p>R dies 😤</p>
 <p>Not run:</p>
-<div class="cell" data-hash="index_cache/html/R-1-m1_2807ed601f772864beb72c08bfef9db5">
+<div class="cell" data-hash="index_cache/html/R-1-m1_805096524f5739c455dd3ec21618477d">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">system.time</span>(</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  R_lmm_1 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    vheight <span class="sc">~</span> birthyear_z2 <span class="sc">*</span> allophone <span class="sc">*</span> gender <span class="sc">+</span> logdur_z2 <span class="sc">+</span> frequency_z2 <span class="sc">+</span></span>
@@ -290,7 +291,7 @@ with metadata given by a Base.ImmutableDict{String, String} with 1 entry:
 </div>
 <div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
 <p>Julia goes brrr</p>
-<div class="cell" data-hash="index_cache/html/J-1-m1_f09f74c8821adc38ef13d117177a5d6e">
+<div class="cell" data-hash="index_cache/html/J-1-m1_13105227fc2c9eae5679be73b6c8364f">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>J_lmm_1 <span class="op">=</span> <span class="pp">@time</span> <span class="fu">fit</span>(</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  MixedModel,</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="pp">@formula</span>(</span>
@@ -301,7 +302,7 @@ with metadata given by a Base.ImmutableDict{String, String} with 1 entry:
 <span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  PNC_ay</span>
 <span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>237.338717 seconds (52.92 M allocations: 3.252 GiB, 0.60% gc time, 16.07% compilation time: 0% of which was recompilation)</code></pre>
+<pre><code>222.050542 seconds (52.92 M allocations: 3.252 GiB, 0.54% gc time, 17.06% compilation time: 1% of which was recompilation)</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Linear mixed model fit by maximum likelihood
@@ -341,7 +342,7 @@ birthyear_z2 &amp; allophone: ay0 &amp; gender: male  -0.0399236   0.0690734   -
 </div>
 </div>
 <p>No singular fit!</p>
-<div class="cell" data-hash="index_cache/html/J-1-m1-singular_f132c748b174df591837abd86c7de39e">
+<div class="cell" data-hash="index_cache/html/J-1-m1-singular_5ed6cfc09ff55f343f30e496d9558c49">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">issingular</span>(J_lmm_1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>false</code></pre>
@@ -359,7 +360,7 @@ birthyear_z2 &amp; allophone: ay0 &amp; gender: male  -0.0399236   0.0690734   -
 <div id="tabset-4-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-4-1-tab">
 <p>R dies 😤</p>
 <p>Not run:</p>
-<div class="cell" data-hash="index_cache/html/R-1-m2_61daa1871c4cd7378b0f9b88152b1dd4">
+<div class="cell" data-hash="index_cache/html/R-1-m2_49d0078913890cd7cfafbe5178de4294">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">system.time</span>(</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  R_lmm_2 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    vheight <span class="sc">~</span> birthyear_z2 <span class="sc">*</span> allophone <span class="sc">*</span> gender <span class="sc">+</span> logdur_z2 <span class="sc">+</span> frequency_z2 <span class="sc">+</span></span>
@@ -372,7 +373,7 @@ birthyear_z2 &amp; allophone: ay0 &amp; gender: male  -0.0399236   0.0690734   -
 </div>
 <div id="tabset-4-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-2-tab">
 <p>Still fits, now faster</p>
-<div class="cell" data-hash="index_cache/html/J-1-m2_d2b969cfcfb16f4d054fce4b78568c2a">
+<div class="cell" data-hash="index_cache/html/J-1-m2_7df724f81913263512429860d7b292c2">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>J_lmm_2 <span class="op">=</span> <span class="pp">@time</span> <span class="fu">fit</span>(</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  MixedModel,</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="pp">@formula</span>(</span>
@@ -383,7 +384,7 @@ birthyear_z2 &amp; allophone: ay0 &amp; gender: male  -0.0399236   0.0690734   -
 <span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  PNC_ay</span>
 <span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code> 74.147855 seconds (3.12 M allocations: 297.334 MiB, 0.25% gc time, 4.68% compilation time)</code></pre>
+<pre><code> 81.842105 seconds (3.12 M allocations: 297.334 MiB, 0.23% gc time, 5.20% compilation time)</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Linear mixed model fit by maximum likelihood
@@ -423,7 +424,7 @@ birthyear_z2 &amp; allophone: ay0 &amp; gender: male  -0.030761    0.0603719   -
 </div>
 </div>
 <p>Best to keep it maximal, though</p>
-<div class="cell" data-hash="index_cache/html/J-1-m1-m2-anova_bb4a5d54ee333c7dd32129ae987b34c2">
+<div class="cell" data-hash="index_cache/html/J-1-m1-m2-anova_7791b872135c4b3aa9d6f244affa473f">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>MixedModels.<span class="fu">likelihoodratiotest</span>(J_lmm_1, J_lmm_2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Model Formulae
@@ -448,7 +449,7 @@ birthyear_z2 &amp; allophone: ay0 &amp; gender: male  -0.030761    0.0603719   -
 <div class="tab-content" data-group="language">
 <div id="tabset-5-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-5-1-tab">
 <p>Finally fits</p>
-<div class="cell" data-hash="index_cache/html/R-1-m3_af31b97ac78c994ed13ca5ff24765cbf">
+<div class="cell" data-hash="index_cache/html/R-1-m3_ad46093d18aaf9d645052f3547528d7b">
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">system.time</span>(</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  R_lmm_3 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(</span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    vheight <span class="sc">~</span> birthyear_z2 <span class="sc">*</span> allophone <span class="sc">*</span> gender <span class="sc">+</span> logdur_z2 <span class="sc">+</span> frequency_z2 <span class="sc">+</span></span>
@@ -459,10 +460,10 @@ birthyear_z2 &amp; allophone: ay0 &amp; gender: male  -0.030761    0.0603719   -
 <span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   user  system elapsed 
-   8.89    0.24    9.30 </code></pre>
+   7.60    0.11    7.98 </code></pre>
 </div>
 </div>
-<div class="cell" data-hash="index_cache/html/R-1-m3-ranef_b1ef0b20d99f2660c3f962aeb0be769b">
+<div class="cell" data-hash="index_cache/html/R-1-m3-ranef_79a3e8a43e00b66b6a9be6ec1e62771c">
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tidy</span>(R_lmm_3, <span class="at">effects =</span> <span class="st">"ran_pars"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 3 × 4
@@ -473,7 +474,7 @@ birthyear_z2 &amp; allophone: ay0 &amp; gender: male  -0.030761    0.0603719   -
 3 ran_pars Residual    sd__Observation    0.564</code></pre>
 </div>
 </div>
-<div class="cell" data-hash="index_cache/html/R-1-m3-fixed_845991e8d37e8c7c3d99589dbb4512a8">
+<div class="cell" data-hash="index_cache/html/R-1-m3-fixed_64de65044451e5df90009a200397b916">
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tidy</span>(R_lmm_3, <span class="at">effects =</span> <span class="st">"fixed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 10 × 7
@@ -495,7 +496,7 @@ birthyear_z2 &amp; allophone: ay0 &amp; gender: male  -0.030761    0.0603719   -
 </div>
 <div id="tabset-5-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-2-tab">
 <p>brrr</p>
-<div class="cell" data-hash="index_cache/html/J-1-m3_d0469837cf09d8a10dc90c509e6901e6">
+<div class="cell" data-hash="index_cache/html/J-1-m3_72acbba08922278539f4e45257bb0e0a">
 <div class="sourceCode cell-code" id="cb31"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>J_lmm_3 <span class="op">=</span> <span class="pp">@time</span> <span class="fu">fit</span>(</span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  MixedModel,</span>
 <span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  <span class="pp">@formula</span>(</span>
@@ -506,7 +507,7 @@ birthyear_z2 &amp; allophone: ay0 &amp; gender: male  -0.030761    0.0603719   -
 <span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>  PNC_ay</span>
 <span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>  6.256374 seconds (3.04 M allocations: 218.748 MiB, 4.75% gc time, 93.71% compilation time)</code></pre>
+<pre><code>  3.776942 seconds (3.04 M allocations: 218.752 MiB, 8.29% gc time, 90.27% compilation time)</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Linear mixed model fit by maximum likelihood
@@ -542,12 +543,82 @@ birthyear_z2 &amp; allophone: ay0 &amp; gender: male  -0.0843574  0.0234411    -
 </div>
 </div>
 </section>
+<section id="misc-bringing-julia-model-to-r" class="level3">
+<h3 class="anchored" data-anchor-id="misc-bringing-julia-model-to-r">Misc: Bringing Julia model to R</h3>
+<p>Load libraries for interfacing with R/lmer:</p>
+<div class="cell" data-hash="index_cache/html/jellyme4_75187610f9491b52a2555d7458b33be7">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">JellyMe4</span>, <span class="bu">RCall</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Pack original df with the model object:</p>
+<div class="cell" data-hash="index_cache/html/augment-model_0a685ef7c9023f27c669e2cce522cf51">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>J_lmm_1_packed <span class="op">=</span> (J_lmm_1, <span class="fu">DataFrame</span>(PNC_ay))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Send to R:</p>
+<div class="cell" data-hash="index_cache/html/transfer-to-R_4b1a7de5af4aa71f4a4224e1517ec53b">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="pp">@rput</span> J_lmm_1_packed</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Save model object:</p>
+<div class="cell" data-hash="index_cache/html/write-transferred-mod_658109588c801883d9958a62e942a440">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>R<span class="st">"saveRDS(J_lmm_1_packed, 'J_lmm_1_packed.rds')"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Read it back in R:</p>
+<div class="cell" data-hash="index_cache/html/read-transferred-mod_ff11f488f3e87c65965d3bdf3ffcaef7">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>J_lmm_1_inR <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"J_lmm_1_packed.rds"</span>)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tidy</span>(J_lmm_1_inR, <span class="at">effects =</span> <span class="st">"fixed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 5
+   effect term                                 estimate std.error statistic
+   &lt;chr&gt;  &lt;chr&gt;                                   &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+ 1 fixed  (Intercept)                          -1.18       0.0259  -45.5   
+ 2 fixed  birthyear_z2                         -0.0339     0.0286   -1.19  
+ 3 fixed  allophoneay0                          0.433      0.0351   12.3   
+ 4 fixed  gendermale                           -0.0378     0.0212   -1.78  
+ 5 fixed  logdur_z2                            -0.446      0.0167  -26.7   
+ 6 fixed  frequency_z2                          0.0488     0.0184    2.64  
+ 7 fixed  birthyear_z2:allophoneay0             0.392      0.0463    8.47  
+ 8 fixed  birthyear_z2:gendermale               0.0423     0.0436    0.971 
+ 9 fixed  allophoneay0:gendermale               0.0507     0.0349    1.45  
+10 fixed  birthyear_z2:allophoneay0:gendermale -0.00700    0.0704   -0.0995</code></pre>
+</div>
+</div>
+<p>Visualize the convergence of a random effect (word intercept) with ggplot:</p>
+<div class="cell" data-hash="index_cache/html/viz-convergence_4ae2c71fda06c784ecf5e00972cdeb0b">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract info from model</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>theta <span class="ot">&lt;-</span> <span class="fu">getME</span>(J_lmm_1_inR, <span class="st">"theta"</span>)</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>word_intercept_theta <span class="ot">&lt;-</span> theta[<span class="dv">1</span>]</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>fit_fn <span class="ot">&lt;-</span> <span class="fu">as.function</span>(J_lmm_1_inR)</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>fit_fn_marginalized <span class="ot">&lt;-</span> <span class="cf">function</span>(word_intercept) {</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit_fn</span>(<span class="fu">replace</span>(theta, <span class="dv">1</span>, word_intercept))</span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot</span></span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(</span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">2</span>, <span class="at">length =</span> <span class="dv">21</span>),</span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> <span class="fu">sapply</span>(x, fit_fn_marginalized)</span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span> </span>
+<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(x, y)) <span class="sc">+</span></span>
+<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"point"</span>, <span class="at">size =</span> <span class="dv">2</span>, <span class="at">color =</span> <span class="st">"red"</span>,</span>
+<span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a>           <span class="at">x =</span> word_intercept_theta,</span>
+<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a>           <span class="at">y =</span> <span class="fu">fit_fn_marginalized</span>(word_intercept_theta)) <span class="sc">+</span></span>
+<span id="cb40-20"><a href="#cb40-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">expand =</span> <span class="fu">expansion</span>(.<span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb40-21"><a href="#cb40-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb40-22"><a href="#cb40-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"(Marginalized) optimization of by-word intercept"</span>,</span>
+<span id="cb40-23"><a href="#cb40-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Deviance (a.k.a. Objective)"</span>,</span>
+<span id="cb40-24"><a href="#cb40-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Scaled standard deviation"</span></span>
+<span id="cb40-25"><a href="#cb40-25" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/viz-convergence-1.svg" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
 <section id="misc-re-fitting-julia-maximal-model-with-reml" class="level3">
 <h3 class="anchored" data-anchor-id="misc-re-fitting-julia-maximal-model-with-reml">Misc: re-fitting Julia maximal model with REML</h3>
-<div class="cell" data-hash="index_cache/html/J-1-m1-reml_f7951a1be700f4869df674b308c6d2f6">
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="pp">@time</span> <span class="fu">refit!</span>(J_lmm_1, REML <span class="op">=</span> <span class="cn">true</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-hash="index_cache/html/J-1-m1-reml_4900d263cf1fddc687fbd42c4ff2aa00">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="pp">@time</span> <span class="fu">refit!</span>(J_lmm_1, REML <span class="op">=</span> <span class="cn">true</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>263.944585 seconds (113.52 k allocations: 5.244 MiB, 0.05% compilation time)</code></pre>
+<pre><code>277.159611 seconds (113.52 k allocations: 5.244 MiB, 0.05% compilation time)</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Linear mixed model fit by REML
@@ -596,10 +667,10 @@ birthyear_z2 &amp; allophone: ay0 &amp; gender: male  -0.0402368   0.0693884   -
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-6-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-1" role="tab" aria-controls="tabset-6-1" aria-selected="true" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-6-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-2" role="tab" aria-controls="tabset-6-2" aria-selected="false" href="">Julia</a></li></ul>
 <div class="tab-content" data-group="language">
 <div id="tabset-6-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-6-1-tab">
-<div class="cell" data-hash="index_cache/html/R-2-data_ac14fe17561aedbad6a8c5e2ac3ba950">
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>CYC_2022 <span class="ot">&lt;-</span> <span class="fu">read_feather</span>(<span class="st">"CYC_2022.arrow"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-hash="index_cache/html/R-2-data_117d9efb9d420a39d09aa293827852c2">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>CYC_2022 <span class="ot">&lt;-</span> <span class="fu">read_feather</span>(<span class="st">"CYC_2022.arrow"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-hash="index_cache/html/R-2-show-data_35621521a5931245e2c97b1b6e4b8ff8">
+<div class="cell" data-hash="index_cache/html/R-2-show-data_e3589756159668f72b5f675a217f4bfa">
 <div class="cell-output-display">
 
 <div data-pagedtable="false">
@@ -611,8 +682,8 @@ birthyear_z2 &amp; allophone: ay0 &amp; gender: male  -0.0402368   0.0693884   -
 </div>
 </div>
 <div id="tabset-6-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-2-tab">
-<div class="cell" data-hash="index_cache/html/J-2-data_ce7ffd39573f8631071a87c90c06353e">
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>CYC_2022 <span class="op">=</span> Arrow.<span class="fu">Table</span>(<span class="st">"CYC_2022.arrow"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-hash="index_cache/html/J-2-data_7ac47f5e74b9c7357af527efc3e1909b">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>CYC_2022 <span class="op">=</span> Arrow.<span class="fu">Table</span>(<span class="st">"CYC_2022.arrow"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Arrow.Table with 1413 rows, 6 columns, and schema:
  :Accuracy      Union{Missing, Float64}
@@ -634,18 +705,18 @@ birthyear_z2 &amp; allophone: ay0 &amp; gender: male  -0.0402368   0.0693884   -
 <div class="tab-content" data-group="language">
 <div id="tabset-7-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-7-1-tab">
 <p>Explicit sum-coding of <code>Condition</code></p>
-<div class="cell" data-hash="index_cache/html/R-2-coding_0fb2580a0fcb30d0287e84148891d7c8">
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>CYC_2022<span class="sc">$</span>Condition <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Verb"</span> <span class="ot">=</span> <span class="dv">1</span>, <span class="st">"Subject"</span> <span class="ot">=</span> <span class="sc">-</span><span class="dv">1</span>)[CYC_2022<span class="sc">$</span>Condition]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-hash="index_cache/html/R-2-coding_a8b61770e03b958684f7d60c78cc0c82">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>CYC_2022<span class="sc">$</span>Condition <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Verb"</span> <span class="ot">=</span> <span class="dv">1</span>, <span class="st">"Subject"</span> <span class="ot">=</span> <span class="sc">-</span><span class="dv">1</span>)[CYC_2022<span class="sc">$</span>Condition]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div id="tabset-7-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-7-2-tab">
 <p>Coding dictionary with sum-coding of <code>Condition</code> and groups marked with <code>Grouping()</code></p>
-<div class="cell" data-hash="index_cache/html/J-2-coding_96c6ca9aef5dab24bac851a7d5996a99">
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>coding2 <span class="op">=</span> <span class="fu">Dict</span>(</span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">:</span>Subject <span class="op">=&gt;</span> <span class="fu">Grouping</span>(),</span>
-<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">:</span>Item <span class="op">=&gt;</span> <span class="fu">Grouping</span>(),</span>
-<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">:</span><span class="dt">Condition</span> <span class="op">=&gt;</span> <span class="fu">EffectsCoding</span>(base <span class="op">=</span> <span class="st">"Subject"</span>)</span>
-<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-hash="index_cache/html/J-2-coding_4bef57a0e9850340d404fb7a7f724538">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>coding2 <span class="op">=</span> <span class="fu">Dict</span>(</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">:</span>Subject <span class="op">=&gt;</span> <span class="fu">Grouping</span>(),</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">:</span>Item <span class="op">=&gt;</span> <span class="fu">Grouping</span>(),</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">:</span><span class="dt">Condition</span> <span class="op">=&gt;</span> <span class="fu">EffectsCoding</span>(base <span class="op">=</span> <span class="st">"Subject"</span>)</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>
@@ -658,29 +729,29 @@ birthyear_z2 &amp; allophone: ay0 &amp; gender: male  -0.0402368   0.0693884   -
 <div class="tab-content" data-group="language">
 <div id="tabset-8-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-8-1-tab">
 <p>R dies 😤</p>
-<div class="cell" data-hash="index_cache/html/R-2-m1_bb7a9ac480f09f577447c2a795501106">
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>R_lmm_1 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(</span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  Accuracy <span class="sc">~</span> Condition <span class="sc">*</span> SemanticFit <span class="sc">*</span> Transitivity <span class="sc">+</span></span>
-<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">1</span> <span class="sc">+</span> Condition <span class="sc">|</span> Item) <span class="sc">+</span></span>
-<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">1</span> <span class="sc">+</span> Condition <span class="sc">*</span> SemanticFit <span class="sc">*</span> Transitivity <span class="sc">|</span> Subject),</span>
-<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> CYC_2022, <span class="at">family =</span> <span class="fu">binomial</span>()</span>
-<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-hash="index_cache/html/R-2-m1_ddd49ff216f3bb896359113db03dd0a9">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>R_lmm_1 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  Accuracy <span class="sc">~</span> Condition <span class="sc">*</span> SemanticFit <span class="sc">*</span> Transitivity <span class="sc">+</span></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">1</span> <span class="sc">+</span> Condition <span class="sc">|</span> Item) <span class="sc">+</span></span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">1</span> <span class="sc">+</span> Condition <span class="sc">*</span> SemanticFit <span class="sc">*</span> Transitivity <span class="sc">|</span> Subject),</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> CYC_2022, <span class="at">family =</span> <span class="fu">binomial</span>()</span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div id="tabset-8-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-8-2-tab">
 <p>Converges…</p>
-<div class="cell" data-hash="index_cache/html/J-2-m1_942fd9903f7ce1ec26bda6bc7f9d0341">
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>J_glmm_1 <span class="op">=</span> <span class="pp">@time</span> <span class="fu">fit</span>(</span>
-<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  MixedModel,</span>
-<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  <span class="pp">@formula</span>(</span>
-<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>    Accuracy <span class="op">~</span> <span class="dt">Condition</span> <span class="op">*</span> SemanticFit <span class="op">*</span> Transitivity <span class="op">+</span></span>
-<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>        (<span class="fl">1</span> <span class="op">+</span> <span class="dt">Condition</span> <span class="op">*</span> SemanticFit <span class="op">*</span> Transitivity <span class="op">|</span> Subject) <span class="op">+</span></span>
-<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>        (<span class="fl">1</span> <span class="op">+</span> <span class="dt">Condition</span> <span class="op">|</span> Item)</span>
-<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>  ),</span>
-<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>  CYC_2022, <span class="fu">Binomial</span>(), contrasts <span class="op">=</span> coding2</span>
-<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-hash="index_cache/html/J-2-m1_a21838e9c16eb1438a4bede5ad67e481">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>J_glmm_1 <span class="op">=</span> <span class="pp">@time</span> <span class="fu">fit</span>(</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>  MixedModel,</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>  <span class="pp">@formula</span>(</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>    Accuracy <span class="op">~</span> <span class="dt">Condition</span> <span class="op">*</span> SemanticFit <span class="op">*</span> Transitivity <span class="op">+</span></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>        (<span class="fl">1</span> <span class="op">+</span> <span class="dt">Condition</span> <span class="op">*</span> SemanticFit <span class="op">*</span> Transitivity <span class="op">|</span> Subject) <span class="op">+</span></span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>        (<span class="fl">1</span> <span class="op">+</span> <span class="dt">Condition</span> <span class="op">|</span> Item)</span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>  CYC_2022, <span class="fu">Binomial</span>(), contrasts <span class="op">=</span> coding2</span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>155.768208 seconds (43.92 M allocations: 2.561 GiB, 0.72% gc time, 20.24% compilation time)</code></pre>
+<pre><code>162.184255 seconds (43.92 M allocations: 2.562 GiB, 0.58% gc time, 17.32% compilation time)</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Generalized Linear Mixed Model fit by maximum likelihood (nAGQ = 1)
@@ -722,8 +793,8 @@ Condition: Verb &amp; SemanticFit &amp; Transitivity   0.0364585   0.0981776   0
 </div>
 </div>
 <p>… but with singular fit</p>
-<div class="cell" data-hash="index_cache/html/J-2-m1-singular_89f9a7c4aaec7a8b2174aea54d986cc8">
-<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">issingular</span>(J_glmm_1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-hash="index_cache/html/J-2-m1-singular_1a5fdd3cba9631bcc72584b5c7b57943">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">issingular</span>(J_glmm_1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>true</code></pre>
 </div>
@@ -739,29 +810,29 @@ Condition: Verb &amp; SemanticFit &amp; Transitivity   0.0364585   0.0981776   0
 <div class="tab-content" data-group="language">
 <div id="tabset-9-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-9-1-tab">
 <p>R dies again 😤</p>
-<div class="cell" data-hash="index_cache/html/R-2-m2_939c6b48e42442255c62420f1d72432c">
-<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>R_glmm_2 <span class="ot">&lt;-</span> <span class="fu">glmer</span>(</span>
-<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>  Accuracy <span class="sc">~</span> Condition <span class="sc">*</span> SemanticFit <span class="sc">*</span> Transitivity <span class="sc">+</span></span>
-<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">1</span> <span class="sc">+</span> Condition <span class="sc">||</span> Item) <span class="sc">+</span></span>
-<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">1</span> <span class="sc">+</span> Condition <span class="sc">*</span> SemanticFit <span class="sc">*</span> Transitivity <span class="sc">||</span> Subject),</span>
-<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> CYC_2022, <span class="at">family =</span> <span class="fu">binomial</span>()</span>
-<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-hash="index_cache/html/R-2-m2_02eccf5084e8670f8c2d3977b3a3ed51">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>R_glmm_2 <span class="ot">&lt;-</span> <span class="fu">glmer</span>(</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>  Accuracy <span class="sc">~</span> Condition <span class="sc">*</span> SemanticFit <span class="sc">*</span> Transitivity <span class="sc">+</span></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">1</span> <span class="sc">+</span> Condition <span class="sc">||</span> Item) <span class="sc">+</span></span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">1</span> <span class="sc">+</span> Condition <span class="sc">*</span> SemanticFit <span class="sc">*</span> Transitivity <span class="sc">||</span> Subject),</span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> CYC_2022, <span class="at">family =</span> <span class="fu">binomial</span>()</span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div id="tabset-9-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-9-2-tab">
 <p>Converges…</p>
-<div class="cell" data-hash="index_cache/html/J-2-m2_8aa80b922647048c66e5de31d7be6eb2">
-<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>J_glmm_2 <span class="op">=</span> <span class="pp">@time</span> <span class="fu">fit</span>(</span>
-<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  MixedModel,</span>
-<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>  <span class="pp">@formula</span>(</span>
-<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>    Accuracy <span class="op">~</span> <span class="dt">Condition</span> <span class="op">*</span> SemanticFit <span class="op">*</span> Transitivity <span class="op">+</span></span>
-<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>        <span class="fu">zerocorr</span>(<span class="fl">1</span> <span class="op">+</span> <span class="dt">Condition</span> <span class="op">*</span> SemanticFit <span class="op">*</span> Transitivity <span class="op">|</span> Subject) <span class="op">+</span></span>
-<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>        <span class="fu">zerocorr</span>(<span class="fl">1</span> <span class="op">+</span> <span class="dt">Condition</span> <span class="op">|</span> Item)</span>
-<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>  ),</span>
-<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>  CYC_2022, <span class="fu">Binomial</span>(), contrasts <span class="op">=</span> coding2</span>
-<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-hash="index_cache/html/J-2-m2_f7ba302db1e795cee398da5e02e88a68">
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>J_glmm_2 <span class="op">=</span> <span class="pp">@time</span> <span class="fu">fit</span>(</span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>  MixedModel,</span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>  <span class="pp">@formula</span>(</span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>    Accuracy <span class="op">~</span> <span class="dt">Condition</span> <span class="op">*</span> SemanticFit <span class="op">*</span> Transitivity <span class="op">+</span></span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>        <span class="fu">zerocorr</span>(<span class="fl">1</span> <span class="op">+</span> <span class="dt">Condition</span> <span class="op">*</span> SemanticFit <span class="op">*</span> Transitivity <span class="op">|</span> Subject) <span class="op">+</span></span>
+<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a>        <span class="fu">zerocorr</span>(<span class="fl">1</span> <span class="op">+</span> <span class="dt">Condition</span> <span class="op">|</span> Item)</span>
+<span id="cb56-7"><a href="#cb56-7" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb56-8"><a href="#cb56-8" aria-hidden="true" tabindex="-1"></a>  CYC_2022, <span class="fu">Binomial</span>(), contrasts <span class="op">=</span> coding2</span>
+<span id="cb56-9"><a href="#cb56-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code> 18.228563 seconds (2.43 M allocations: 125.469 MiB, 0.92% gc time, 15.59% compilation time)</code></pre>
+<pre><code> 16.179590 seconds (2.43 M allocations: 125.399 MiB, 0.69% gc time, 17.87% compilation time)</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Generalized Linear Mixed Model fit by maximum likelihood (nAGQ = 1)
@@ -803,15 +874,15 @@ Condition: Verb &amp; SemanticFit &amp; Transitivity   0.0165828    0.0959497   
 </div>
 </div>
 <p>… butwith singular fit, again</p>
-<div class="cell" data-hash="index_cache/html/J-2-m2-singular_db5964ee21d026f5e57ac276ca54150c">
-<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">issingular</span>(J_glmm_2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-hash="index_cache/html/J-2-m2-singular_2aeeabdbbbab754a0dddf5fbe53bffce">
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="fu">issingular</span>(J_glmm_2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>true</code></pre>
 </div>
 </div>
 <p>PCA on random effects structure:</p>
-<div class="cell" data-hash="index_cache/html/J-2-m2-repca_7d3cd143eaa194f00ec2f836d1142f26">
-<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>J_glmm_2.rePCA</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-hash="index_cache/html/J-2-m2-repca_292f94d7908ae354de9d36b4b31dabb3">
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>J_glmm_2.rePCA</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>(Subject = [0.3333333333333333, 0.6666666666666666, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], Item = [1.0, 1.0])</code></pre>
 </div>
@@ -827,39 +898,39 @@ Condition: Verb &amp; SemanticFit &amp; Transitivity   0.0165828    0.0959497   
 <div class="tab-content" data-group="language">
 <div id="tabset-10-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-10-1-tab">
 <p>R doesn’t die, but model fails to converge</p>
-<div class="cell" data-hash="index_cache/html/R-2-m3_3b29329f44b95ea8f08f843ba0740913">
-<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">system.time</span>(</span>
-<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>  R_glmm_3 <span class="ot">&lt;-</span> <span class="fu">glmer</span>(</span>
-<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>    Accuracy <span class="sc">~</span> Condition <span class="sc">*</span> SemanticFit <span class="sc">*</span> Transitivity <span class="sc">+</span></span>
-<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>      (<span class="dv">1</span> <span class="sc">|</span> Item) <span class="sc">+</span></span>
-<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>      (<span class="dv">1</span> <span class="sc">+</span> Condition <span class="sc">|</span> Subject),</span>
-<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> CYC_2022, <span class="at">family =</span> <span class="fu">binomial</span>()</span>
-<span id="cb56-7"><a href="#cb56-7" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb56-8"><a href="#cb56-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-hash="index_cache/html/R-2-m3_5c0ce49fa6267c6974d8113612b742d4">
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="fu">system.time</span>(</span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>  R_glmm_3 <span class="ot">&lt;-</span> <span class="fu">glmer</span>(</span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a>    Accuracy <span class="sc">~</span> Condition <span class="sc">*</span> SemanticFit <span class="sc">*</span> Transitivity <span class="sc">+</span></span>
+<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a>      (<span class="dv">1</span> <span class="sc">|</span> Item) <span class="sc">+</span></span>
+<span id="cb63-5"><a href="#cb63-5" aria-hidden="true" tabindex="-1"></a>      (<span class="dv">1</span> <span class="sc">+</span> Condition <span class="sc">|</span> Subject),</span>
+<span id="cb63-6"><a href="#cb63-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> CYC_2022, <span class="at">family =</span> <span class="fu">binomial</span>()</span>
+<span id="cb63-7"><a href="#cb63-7" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb63-8"><a href="#cb63-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv, :
-Model failed to converge with max|grad| = 0.00526931 (tol = 0.002, component 1)</code></pre>
+Model failed to converge with max|grad| = 0.00531977 (tol = 0.002, component 1)</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   user  system elapsed 
-   6.61    0.15    6.98 </code></pre>
+   7.22    0.23    7.89 </code></pre>
 </div>
 </div>
 </div>
 <div id="tabset-10-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-10-2-tab">
 <p>Converges …</p>
-<div class="cell" data-hash="index_cache/html/J-2-m3_2a153602dc0e7f26386ea2b3957e2c45">
-<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>J_glmm_3 <span class="op">=</span> <span class="pp">@time</span> <span class="fu">fit</span>(</span>
-<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>  MixedModel,</span>
-<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>  <span class="pp">@formula</span>(</span>
-<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a>    Accuracy <span class="op">~</span> <span class="dt">Condition</span> <span class="op">*</span> SemanticFit <span class="op">*</span> Transitivity <span class="op">+</span></span>
-<span id="cb59-5"><a href="#cb59-5" aria-hidden="true" tabindex="-1"></a>        (<span class="fl">1</span> <span class="op">+</span> <span class="dt">Condition</span> <span class="op">|</span> Subject) <span class="op">+</span></span>
-<span id="cb59-6"><a href="#cb59-6" aria-hidden="true" tabindex="-1"></a>        (<span class="fl">1</span> <span class="op">|</span> Item)</span>
-<span id="cb59-7"><a href="#cb59-7" aria-hidden="true" tabindex="-1"></a>  ),</span>
-<span id="cb59-8"><a href="#cb59-8" aria-hidden="true" tabindex="-1"></a>  CYC_2022, <span class="fu">Binomial</span>(), contrasts <span class="op">=</span> coding2</span>
-<span id="cb59-9"><a href="#cb59-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-hash="index_cache/html/J-2-m3_d93bc189462ececd0b9c093725f7801c">
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>J_glmm_3 <span class="op">=</span> <span class="pp">@time</span> <span class="fu">fit</span>(</span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a>  MixedModel,</span>
+<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a>  <span class="pp">@formula</span>(</span>
+<span id="cb66-4"><a href="#cb66-4" aria-hidden="true" tabindex="-1"></a>    Accuracy <span class="op">~</span> <span class="dt">Condition</span> <span class="op">*</span> SemanticFit <span class="op">*</span> Transitivity <span class="op">+</span></span>
+<span id="cb66-5"><a href="#cb66-5" aria-hidden="true" tabindex="-1"></a>        (<span class="fl">1</span> <span class="op">+</span> <span class="dt">Condition</span> <span class="op">|</span> Subject) <span class="op">+</span></span>
+<span id="cb66-6"><a href="#cb66-6" aria-hidden="true" tabindex="-1"></a>        (<span class="fl">1</span> <span class="op">|</span> Item)</span>
+<span id="cb66-7"><a href="#cb66-7" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb66-8"><a href="#cb66-8" aria-hidden="true" tabindex="-1"></a>  CYC_2022, <span class="fu">Binomial</span>(), contrasts <span class="op">=</span> coding2</span>
+<span id="cb66-9"><a href="#cb66-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code> 10.535035 seconds (1.97 M allocations: 96.291 MiB, 1.53% gc time, 25.16% compilation time)</code></pre>
+<pre><code>  8.892317 seconds (1.97 M allocations: 96.241 MiB, 1.02% gc time, 31.09% compilation time)</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Generalized Linear Mixed Model fit by maximum likelihood (nAGQ = 1)
@@ -894,8 +965,8 @@ Condition: Verb &amp; SemanticFit &amp; Transitivity   0.0295662     0.0949214  
 </div>
 </div>
 <p>… no singular fit!</p>
-<div class="cell" data-hash="index_cache/html/J-2-m3-singular_3d2d51ea1c03b51efbc818653523f7d3">
-<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="fu">issingular</span>(J_glmm_3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-hash="index_cache/html/J-2-m3-singular_a0b3c204d00a51da9bd2abf1f64313d1">
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="fu">issingular</span>(J_glmm_3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>false</code></pre>
 </div>
@@ -911,22 +982,22 @@ Condition: Verb &amp; SemanticFit &amp; Transitivity   0.0295662     0.0949214  
 <div class="tab-content" data-group="language">
 <div id="tabset-11-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-11-1-tab">
 <p>Converges</p>
-<div class="cell" data-hash="index_cache/html/R-2-m4_ac23afb8c12f83e8af20e3c337c437ef">
-<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="fu">system.time</span>(</span>
-<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a>  R_glmm_4 <span class="ot">&lt;-</span> <span class="fu">glmer</span>(</span>
-<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a>    Accuracy <span class="sc">~</span> Condition <span class="sc">+</span> SemanticFit <span class="sc">*</span> Transitivity <span class="sc">+</span></span>
-<span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a>      (<span class="dv">1</span> <span class="sc">|</span> Item) <span class="sc">+</span></span>
-<span id="cb64-5"><a href="#cb64-5" aria-hidden="true" tabindex="-1"></a>      (<span class="dv">1</span> <span class="sc">+</span> Condition <span class="sc">|</span> Subject),</span>
-<span id="cb64-6"><a href="#cb64-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> CYC_2022, <span class="at">family =</span> <span class="fu">binomial</span>()</span>
-<span id="cb64-7"><a href="#cb64-7" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb64-8"><a href="#cb64-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-hash="index_cache/html/R-2-m4_f56df74388bfd7a6aeee91004729755b">
+<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="fu">system.time</span>(</span>
+<span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a>  R_glmm_4 <span class="ot">&lt;-</span> <span class="fu">glmer</span>(</span>
+<span id="cb71-3"><a href="#cb71-3" aria-hidden="true" tabindex="-1"></a>    Accuracy <span class="sc">~</span> Condition <span class="sc">+</span> SemanticFit <span class="sc">*</span> Transitivity <span class="sc">+</span></span>
+<span id="cb71-4"><a href="#cb71-4" aria-hidden="true" tabindex="-1"></a>      (<span class="dv">1</span> <span class="sc">|</span> Item) <span class="sc">+</span></span>
+<span id="cb71-5"><a href="#cb71-5" aria-hidden="true" tabindex="-1"></a>      (<span class="dv">1</span> <span class="sc">+</span> Condition <span class="sc">|</span> Subject),</span>
+<span id="cb71-6"><a href="#cb71-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> CYC_2022, <span class="at">family =</span> <span class="fu">binomial</span>()</span>
+<span id="cb71-7"><a href="#cb71-7" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb71-8"><a href="#cb71-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   user  system elapsed 
-   5.28    0.01    5.40 </code></pre>
+   4.15    0.00    4.19 </code></pre>
 </div>
 </div>
-<div class="cell" data-hash="index_cache/html/R-2-m4-ranef_77ccafb8b15c8addd10c01165da32dc7">
-<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tidy</span>(R_glmm_4, <span class="at">effects =</span> <span class="st">"ran_pars"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-hash="index_cache/html/R-2-m4-ranef_35fe652170768c6ff7db13ce76c9e50c">
+<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tidy</span>(R_glmm_4, <span class="at">effects =</span> <span class="st">"ran_pars"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 4 × 4
   effect   group   term                       estimate
@@ -937,8 +1008,8 @@ Condition: Verb &amp; SemanticFit &amp; Transitivity   0.0295662     0.0949214  
 4 ran_pars Item    sd__(Intercept)               0.532</code></pre>
 </div>
 </div>
-<div class="cell" data-hash="index_cache/html/R-2-m4-coef_92e3427324d11cd8859da8a9950842b9">
-<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tidy</span>(R_glmm_4, <span class="at">effects =</span> <span class="st">"fixed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-hash="index_cache/html/R-2-m4-coef_42f167612a6c2224d532c758e695bd85">
+<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tidy</span>(R_glmm_4, <span class="at">effects =</span> <span class="st">"fixed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 5 × 6
   effect term                     estimate std.error statistic  p.value
@@ -953,18 +1024,18 @@ Condition: Verb &amp; SemanticFit &amp; Transitivity   0.0295662     0.0949214  
 </div>
 <div id="tabset-11-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-11-2-tab">
 <p>Converges, of course</p>
-<div class="cell" data-hash="index_cache/html/J-2-m4_d26f00246a54fb1414760db3386b3a17">
-<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a>J_glmm_4 <span class="op">=</span> <span class="pp">@time</span> <span class="fu">fit</span>(</span>
-<span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a>  MixedModel,</span>
-<span id="cb70-3"><a href="#cb70-3" aria-hidden="true" tabindex="-1"></a>  <span class="pp">@formula</span>(</span>
-<span id="cb70-4"><a href="#cb70-4" aria-hidden="true" tabindex="-1"></a>    Accuracy <span class="op">~</span> <span class="dt">Condition</span> <span class="op">+</span> SemanticFit <span class="op">*</span> Transitivity <span class="op">+</span></span>
-<span id="cb70-5"><a href="#cb70-5" aria-hidden="true" tabindex="-1"></a>        (<span class="fl">1</span> <span class="op">+</span> <span class="dt">Condition</span> <span class="op">|</span> Subject) <span class="op">+</span></span>
-<span id="cb70-6"><a href="#cb70-6" aria-hidden="true" tabindex="-1"></a>        (<span class="fl">1</span> <span class="op">|</span> Item)</span>
-<span id="cb70-7"><a href="#cb70-7" aria-hidden="true" tabindex="-1"></a>  ),</span>
-<span id="cb70-8"><a href="#cb70-8" aria-hidden="true" tabindex="-1"></a>  CYC_2022, <span class="fu">Binomial</span>(), contrasts <span class="op">=</span> coding2</span>
-<span id="cb70-9"><a href="#cb70-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-hash="index_cache/html/J-2-m4_275a5455338707bd83f109be94cc23af">
+<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a>J_glmm_4 <span class="op">=</span> <span class="pp">@time</span> <span class="fu">fit</span>(</span>
+<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a>  MixedModel,</span>
+<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a>  <span class="pp">@formula</span>(</span>
+<span id="cb77-4"><a href="#cb77-4" aria-hidden="true" tabindex="-1"></a>    Accuracy <span class="op">~</span> <span class="dt">Condition</span> <span class="op">+</span> SemanticFit <span class="op">*</span> Transitivity <span class="op">+</span></span>
+<span id="cb77-5"><a href="#cb77-5" aria-hidden="true" tabindex="-1"></a>        (<span class="fl">1</span> <span class="op">+</span> <span class="dt">Condition</span> <span class="op">|</span> Subject) <span class="op">+</span></span>
+<span id="cb77-6"><a href="#cb77-6" aria-hidden="true" tabindex="-1"></a>        (<span class="fl">1</span> <span class="op">|</span> Item)</span>
+<span id="cb77-7"><a href="#cb77-7" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb77-8"><a href="#cb77-8" aria-hidden="true" tabindex="-1"></a>  CYC_2022, <span class="fu">Binomial</span>(), contrasts <span class="op">=</span> coding2</span>
+<span id="cb77-9"><a href="#cb77-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>  4.590569 seconds (1.96 M allocations: 104.763 MiB, 66.30% compilation time)</code></pre>
+<pre><code>  3.393478 seconds (1.96 M allocations: 104.747 MiB, 65.72% compilation time)</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Generalized Linear Mixed Model fit by maximum likelihood (nAGQ = 1)
@@ -1002,8 +1073,8 @@ SemanticFit &amp; Transitivity  -0.444698   0.157577   -2.82    0.0048
 <section id="model-comparison" class="level3">
 <h3 class="anchored" data-anchor-id="model-comparison">Model comparison</h3>
 <p>Reduced model is actually adequate, and you might prefer this if you care about parsimony, but only Julia can give us this info:</p>
-<div class="cell" data-hash="index_cache/html/J-2-m3-m4-anova_5db0d69ec3536d7b9492ef466188e789">
-<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a>MixedModels.<span class="fu">likelihoodratiotest</span>(J_glmm_3, J_glmm_4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-hash="index_cache/html/J-2-m3-m4-anova_045a0c28a256efe3a79b5797f4fd73fd">
+<div class="sourceCode cell-code" id="cb80"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a>MixedModels.<span class="fu">likelihoodratiotest</span>(J_glmm_3, J_glmm_4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Model Formulae
 1: Accuracy ~ 1 + Condition + SemanticFit + Transitivity + SemanticFit &amp; Transitivity + (1 + Condition | Subject) + (1 | Item)
@@ -1017,8 +1088,8 @@ SemanticFit &amp; Transitivity  -0.444698   0.157577   -2.82    0.0048
 </div>
 </div>
 <p>R actually can give us the same info, but only because the max model that failed to converge happened to get pretty close.</p>
-<div class="cell" data-hash="index_cache/html/R-2-m3-m4-anova_ba4e643d3f09ca6a012ed359c430e178">
-<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(R_glmm_3, R_glmm_4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-hash="index_cache/html/R-2-m3-m4-anova_681ca999d071e3ddbe6feb9fcd8d12ef">
+<div class="sourceCode cell-code" id="cb82"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(R_glmm_3, R_glmm_4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Data: CYC_2022
 Models:
@@ -1031,22 +1102,22 @@ R_glmm_3   12 1251.3 1314.3 -613.65   1227.3 1.4627  3     0.6909</code></pre>
 </div>
 <p>Generally you can’t do tests like this on models that fail to converge. While the convergence issue here was just one of performance (lower threshold or # of iterations would’ve sufficed), you can’t know this a priori. You also cannot make any claims about how trivial the contribution of the dropped interaction effects were in the <code>R_glmm_3</code> model because it failed to converge.</p>
 </section>
-<section id="misc-fast-fitting-of-maximal-model" class="level3">
-<h3 class="anchored" data-anchor-id="misc-fast-fitting-of-maximal-model">Misc: <code>fast</code> fitting of maximal model</h3>
-<p>Only available for GLMM</p>
-<div class="cell" data-hash="index_cache/html/J-2-m1-fast_c5c90bb6ebde27d33ffa06ab61065b11">
-<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a><span class="pp">@time</span> <span class="fu">fit</span>(</span>
-<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a>  MixedModel,</span>
-<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a>  <span class="pp">@formula</span>(</span>
-<span id="cb77-4"><a href="#cb77-4" aria-hidden="true" tabindex="-1"></a>    Accuracy <span class="op">~</span> <span class="dt">Condition</span> <span class="op">*</span> SemanticFit <span class="op">*</span> Transitivity <span class="op">+</span></span>
-<span id="cb77-5"><a href="#cb77-5" aria-hidden="true" tabindex="-1"></a>        (<span class="fl">1</span> <span class="op">+</span> <span class="dt">Condition</span> <span class="op">*</span> SemanticFit <span class="op">*</span> Transitivity <span class="op">|</span> Subject) <span class="op">+</span></span>
-<span id="cb77-6"><a href="#cb77-6" aria-hidden="true" tabindex="-1"></a>        (<span class="fl">1</span> <span class="op">+</span> <span class="dt">Condition</span> <span class="op">|</span> Item)</span>
-<span id="cb77-7"><a href="#cb77-7" aria-hidden="true" tabindex="-1"></a>  ),</span>
-<span id="cb77-8"><a href="#cb77-8" aria-hidden="true" tabindex="-1"></a>  CYC_2022, <span class="fu">Binomial</span>(), contrasts <span class="op">=</span> coding2,</span>
-<span id="cb77-9"><a href="#cb77-9" aria-hidden="true" tabindex="-1"></a>  fast <span class="op">=</span> <span class="cn">true</span></span>
-<span id="cb77-10"><a href="#cb77-10" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="misc-fast-true-fitting-of-maximal-model" class="level3">
+<h3 class="anchored" data-anchor-id="misc-fast-true-fitting-of-maximal-model">Misc: <code>fast = true</code> fitting of maximal model</h3>
+<p>Only available for GLMM:</p>
+<div class="cell" data-hash="index_cache/html/J-2-m1-fast_7fb355544cdac03352708f5a2052ab55">
+<div class="sourceCode cell-code" id="cb84"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a><span class="pp">@time</span> <span class="fu">fit</span>(</span>
+<span id="cb84-2"><a href="#cb84-2" aria-hidden="true" tabindex="-1"></a>  MixedModel,</span>
+<span id="cb84-3"><a href="#cb84-3" aria-hidden="true" tabindex="-1"></a>  <span class="pp">@formula</span>(</span>
+<span id="cb84-4"><a href="#cb84-4" aria-hidden="true" tabindex="-1"></a>    Accuracy <span class="op">~</span> <span class="dt">Condition</span> <span class="op">*</span> SemanticFit <span class="op">*</span> Transitivity <span class="op">+</span></span>
+<span id="cb84-5"><a href="#cb84-5" aria-hidden="true" tabindex="-1"></a>        (<span class="fl">1</span> <span class="op">+</span> <span class="dt">Condition</span> <span class="op">*</span> SemanticFit <span class="op">*</span> Transitivity <span class="op">|</span> Subject) <span class="op">+</span></span>
+<span id="cb84-6"><a href="#cb84-6" aria-hidden="true" tabindex="-1"></a>        (<span class="fl">1</span> <span class="op">+</span> <span class="dt">Condition</span> <span class="op">|</span> Item)</span>
+<span id="cb84-7"><a href="#cb84-7" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb84-8"><a href="#cb84-8" aria-hidden="true" tabindex="-1"></a>  CYC_2022, <span class="fu">Binomial</span>(), contrasts <span class="op">=</span> coding2,</span>
+<span id="cb84-9"><a href="#cb84-9" aria-hidden="true" tabindex="-1"></a>  fast <span class="op">=</span> <span class="cn">true</span></span>
+<span id="cb84-10"><a href="#cb84-10" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code> 28.149659 seconds (1.95 M allocations: 93.016 MiB, 10.10% compilation time)</code></pre>
+<pre><code> 21.409956 seconds (1.95 M allocations: 92.880 MiB, 7.22% compilation time)</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Generalized Linear Mixed Model fit by maximum likelihood (nAGQ = 1)
@@ -1092,9 +1163,12 @@ Condition: Verb &amp; SemanticFit &amp; Transitivity   0.0273795   0.0959468   0
 </section>
 <section id="version-info" class="level2">
 <h2 class="anchored" data-anchor-id="version-info">Version info</h2>
-<p>R</p>
-<div class="cell" data-hash="index_cache/html/R-session_b835589e806f5daff521d00136aaa098">
-<div class="sourceCode cell-code" id="cb80"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a>R.version</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="panel-tabset" data-group="language">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-12-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-12-1" role="tab" aria-controls="tabset-12-1" aria-selected="true" href="">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-12-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-12-2" role="tab" aria-controls="tabset-12-2" aria-selected="false" href="">Julia</a></li></ul>
+<div class="tab-content" data-group="language">
+<div id="tabset-12-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-12-1-tab">
+<div class="cell" data-hash="index_cache/html/R-session_0c1ee52046893de7af8c70a8b5e7050e">
+<div class="sourceCode cell-code" id="cb87"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a>R.version</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>               _                                
 platform       x86_64-w64-mingw32               
@@ -1113,14 +1187,15 @@ language       R
 version.string R version 4.2.1 (2022-06-23 ucrt)
 nickname       Funny-Looking Kid                </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb82"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a><span class="fu">packageVersion</span>(<span class="st">"lme4"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb89"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb89-1"><a href="#cb89-1" aria-hidden="true" tabindex="-1"></a><span class="fu">packageVersion</span>(<span class="st">"lme4"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] '1.1.30'</code></pre>
 </div>
 </div>
-<p>Julia</p>
-<div class="cell" data-hash="index_cache/html/J-session_56e0f44c1ba0b00adead0248c05f6faf">
-<div class="sourceCode cell-code" id="cb84"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a><span class="fu">versioninfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="tabset-12-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-12-2-tab">
+<div class="cell" data-hash="index_cache/html/J-session_3f14f27d71e463b01ae4c971bcb9660b">
+<div class="sourceCode cell-code" id="cb91"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a><span class="fu">versioninfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Julia Version 1.8.0
 Commit 5544a0fab7 (2022-08-17 13:38 UTC)
@@ -1132,11 +1207,14 @@ Platform Info:
   LLVM: libLLVM-13.0.1 (ORCJIT, skylake)
   Threads: 1 on 8 virtual cores</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb86"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Pkg</span></span>
-<span id="cb86-2"><a href="#cb86-2" aria-hidden="true" tabindex="-1"></a><span class="bu">Pkg</span>.<span class="fu">status</span>(<span class="st">"MixedModels"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb93"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb93-1"><a href="#cb93-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Pkg</span></span>
+<span id="cb93-2"><a href="#cb93-2" aria-hidden="true" tabindex="-1"></a><span class="bu">Pkg</span>.<span class="fu">status</span>(<span class="st">"MixedModels"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Status `C:\Users\jchoe\.julia\environments\v1.8\Project.toml`
   [ff71e718] MixedModels v4.7.0</code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 </section>

@@ -7,6 +7,11 @@ format:
     theme: flatly
     toc: true
     page-layout: full
+knitr:
+  opts_chunk:
+    dev: "svglite"
+    dev.args:
+      scaling: 1.5
 filters:
   - grouped-tabsets
 cache: true
@@ -215,6 +220,77 @@ J_lmm_3 = @time fit(
 ```
 
 :::
+
+
+### Misc: Bringing Julia model to R
+
+Load libraries for interfacing with R/lmer:
+
+```{julia jellyme4}
+#| eval: false
+using JellyMe4, RCall
+```
+
+Pack original df with the model object:
+
+```{julia augment-model}
+#| eval: false
+J_lmm_1_packed = (J_lmm_1, DataFrame(PNC_ay))
+```
+
+Send to R:
+
+```{julia transfer-to-R}
+#| eval: false
+@rput J_lmm_1_packed
+```
+
+Save model object:
+
+```{julia write-transferred-mod}
+#| eval: false
+R"saveRDS(J_lmm_1_packed, 'J_lmm_1_packed.rds')"
+```
+
+Read it back in R:
+
+```{r read-transferred-mod}
+J_lmm_1_inR <- readRDS("J_lmm_1_packed.rds")
+tidy(J_lmm_1_inR, effects = "fixed")
+```
+
+Visualize the convergence of a random effect (word intercept) with ggplot:
+
+```{r viz-convergence}
+#| message: false
+#| warning: false
+# Extract info from model
+theta <- getME(J_lmm_1_inR, "theta")
+word_intercept_theta <- theta[1]
+fit_fn <- as.function(J_lmm_1_inR)
+fit_fn_marginalized <- function(word_intercept) {
+  fit_fn(replace(theta, 1, word_intercept))
+}
+# Plot
+library(dplyr)
+library(ggplot2)
+tibble(
+  x = seq(0, 2, length = 21),
+  y = sapply(x, fit_fn_marginalized)
+) %>% 
+  ggplot(aes(x, y)) +
+  geom_line() +
+  annotate("point", size = 2, color = "red",
+           x = word_intercept_theta,
+           y = fit_fn_marginalized(word_intercept_theta)) +
+  scale_y_continuous(expand = expansion(.1)) +
+  labs(
+    title = "(Marginalized) optimization of by-word intercept",
+    y = "Deviance (a.k.a. Objective)",
+    x = "Scaled standard deviation"
+  )
+```
+
 
 ### Misc: re-fitting Julia maximal model with REML
 
@@ -472,9 +548,9 @@ anova(R_glmm_3, R_glmm_4)
 
 Generally you can't do tests like this on models that fail to converge. While the convergence issue here was just one of performance (lower threshold or # of iterations would've sufficed), you can't know this a priori. You also cannot make any claims about how trivial the contribution of the dropped interaction effects were in the `R_glmm_3` model because it failed to converge.
 
-### Misc: `fast` fitting of maximal model
+### Misc: `fast = true` fitting of maximal model
 
-Only available for GLMM
+Only available for GLMM:
 
 ```{julia J-2-m1-fast}
 @time fit(
@@ -494,14 +570,16 @@ Only available for GLMM
 
 ## Version info
 
-R
+::: {.panel-tabset group="language"}
+
+## R
 
 ```{r R-session}
 R.version
 packageVersion("lme4")
 ```
 
-Julia
+## Julia
 
 ```{julia J-session}
 versioninfo()
@@ -509,3 +587,4 @@ using Pkg
 Pkg.status("MixedModels")
 ```
 
+:::
